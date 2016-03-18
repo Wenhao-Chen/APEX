@@ -1,9 +1,19 @@
 package gui.exploration;
 
+import gui.Hierarchy;
+import gui.UIAutomator;
+
+import java.io.File;
+
 import model.ApexApp;
 
 public class DepthFirst {
 
+	
+	public static void main(String[] args)
+	{
+		explore(null);
+	}
 	
 	// 0. Static analyze the app
 	// 1. Instrument the app
@@ -15,6 +25,7 @@ public class DepthFirst {
 	// 7. goto step 4
 	public static void explore(ApexApp appModel)
 	{
-		
+		File hierarchyXML = UIAutomator.dumpWindowXML();
+		Hierarchy h = new Hierarchy(hierarchyXML);
 	}
 }
