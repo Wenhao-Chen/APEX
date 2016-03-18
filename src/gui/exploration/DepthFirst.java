@@ -27,5 +27,6 @@ public class DepthFirst {
 	{
 		File hierarchyXML = UIAutomator.dumpWindowXML();
 		Hierarchy h = new Hierarchy(hierarchyXML);
+		
 	}
 }

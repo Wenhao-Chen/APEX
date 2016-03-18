@@ -14,8 +14,11 @@ public class Common {
 		return exec(Settings.adbPath + " " + command);
 	}
 	
-	
-	
+	public static Process installApp(String apkPath)
+	{
+		return exec(Settings.adbPath + " install -r " + apkPath);
+	}
+		
 	public static ArrayList<String> readOutStream(Process p)
 	{
 		ArrayList<String> result = new ArrayList<String>();
