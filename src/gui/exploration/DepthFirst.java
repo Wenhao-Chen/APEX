@@ -10,11 +10,6 @@ import model.ApexApp;
 public class DepthFirst {
 
 	
-	public static void main(String[] args)
-	{
-		explore(null);
-	}
-	
 	// 0. Static analyze the app
 	// 1. Instrument the app
 	// 2. Install the app
