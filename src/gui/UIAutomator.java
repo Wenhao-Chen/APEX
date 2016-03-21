@@ -1,22 +1,23 @@
 package gui;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class UIAutomator {
 
+	public static final String localDumpFilePath = "temp/window_dump.xml";
 	
-	public static File dumpWindowXML()
+	public static ArrayList<String> dump()
 	{
-		// 1. "adb shell uiautomator dump"
-		// 3. "adb pull <dumped file> <local path>"
-		// 4. return the file
-		
-		Common.adb("shell uiautomator dump --compressed");
-		// Assuming the dumped file is at /sdcard/window_dump.xml
-		File tempF = new File("temp/window_dump.xml");
+		Process p = Communication.adb("shell uiautomator dump --compressed");
+		return Communication.readOutStream(p);
+	}
+	
+	public static File pullDump()
+	{
+		File tempF = new File(localDumpFilePath);
 		tempF.getParentFile().mkdirs();
-		Common.adb("pull /sdcard/window_dump.xml temp/window_dump.xml");
-		
+		Communication.adb("pull /sdcard/window_dump.xml " + localDumpFilePath);
 		return tempF;
 	}
 	

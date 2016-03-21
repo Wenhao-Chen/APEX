@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import main.Settings;
 
-public class Common {
+public class Communication {
 
 	
 	public static Process adb(String command)

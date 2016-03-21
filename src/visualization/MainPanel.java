@@ -1,5 +1,6 @@
 package visualization;
 
+import gui.Hierarchy;
 import gui.View;
 
 import java.awt.Color;
@@ -8,15 +9,16 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
@@ -24,49 +26,35 @@ public class MainPanel extends JPanel{
 
 	private static final long serialVersionUID = 1L;
 	
-	protected JButton b1;
-	protected JTextArea t1;
-	protected Worker worker;
-	protected Data data;
 	private MainPanel me;
 	
-	private static int offsetX = 20;
-	private static int offsetY = 20;
-	private static int shrink_factor = 4;
+	protected JButton b_RefreshScreen, b_DoClick, b_ClearScreen;
+	protected JTextArea ta_ViewAttr, t2, ta_RuntimeLog;
+	protected JScrollPane sp1;
+	protected Data data;
 	
-
+	private enum PaintCommand {None, Regular, HighlightClickable};
+	private static PaintCommand paintCommand = PaintCommand.Regular;
+	
+	private static int offsetX = 80;
+	private static int offsetY = 40;
+	private static int shrink_factor = 3;
+	
+	private static int screenAreaWidth = 800;
+	
 	public static void main(String[] args)
 	{
 		init();
 	}
+
 	
 	public MainPanel()
 	{
 		this.data = new Data();
 		me = this;
-		setBorder(BorderFactory.createLineBorder(Color.black));
-		setLayout(new FlowLayout(FlowLayout.RIGHT));
 		
-		///////////// The right half of the panel  ///////////////////////
-		JPanel p1 = new JPanel();
-		add(p1);
-		b1 = new JButton("Start");
-		p1.add(b1);
-		b1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				worker = new Worker(me);
-				worker.execute();
-			}
-		});
-		
-		t1 = new JTextArea();
-		t1.setRows(20);
-		t1.setColumns(40);
-		t1.setText("Click on a view and its attributes will show here.");
-		p1.add(t1);
-		////////////////////////////////////////////////////////////////////
+		initWidgets();
+		organizeLayout();
 		
 		this.addMouseListener(new MouseAdapter() {
 			@Override
@@ -78,40 +66,111 @@ public class MainPanel extends JPanel{
 					return;
 				
 				Rectangle rect = data.currentHierarchy.getRootView().getBoundsRect();
-				int x = rect.x/shrink_factor + offsetX;
-				int y = rect.y/shrink_factor + offsetY;
-				int width = rect.width/shrink_factor;
-				int height = rect.height/shrink_factor;
-				Rectangle actualRect = new Rectangle(x, y, width, height);
+				Rectangle actualRect = getActualRect(rect);
 				if (!actualRect.contains(e.getX(), e.getY()))
 					return;
 				
+				List<View> selectedViews = new ArrayList<View>();
 				for (View view: data.currentHierarchy.getLeafViews())
 				{
-					rect = view.getBoundsRect();
-					x = rect.x/shrink_factor + offsetX;
-					y = rect.y/shrink_factor + offsetY;
-					width = rect.width/shrink_factor;
-					height = rect.height/shrink_factor;
-					actualRect = new Rectangle(x, y, width, height);
+					actualRect = getActualRect(view.getBoundsRect());
 					if (actualRect.contains(e.getX(), e.getY()))
 					{
-						data.selectedView = view;
+						selectedViews.add(view);
 						leafViewChecked = true;
-						break;
 					}
 				}
-				if (!leafViewChecked)
-					data.selectedView = null;
-				if (data.selectedView != null)
-					t1.setText(data.selectedView.getAttributes());
+				if (leafViewChecked)
+				{
+					data.selectedView = selectedViews.get(0);
+					for (View v : selectedViews)
+					{
+						if (data.selectedView.getBoundsRect().contains(v.getBoundsRect()))
+							data.selectedView = v;
+					}
+					ta_ViewAttr.setText(data.selectedView.getAttributes());
+				}
 				else
-					t1.setText("Click on a view and its attributes will show here.");
+				{
+					data.selectedView = null;
+					ta_ViewAttr.setText(data.currentHierarchy.getRootView().getAttributes());
+				}
+				repaint();
+			}
+		});		
+	}
+	
+	private void initWidgets()
+	{
+
+		b_RefreshScreen = new JButton("Display Layout Hierarchy");
+		b_RefreshScreen.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				paintCommand = PaintCommand.Regular;
+				new UIAutomatorWorker(me).execute();
+			}
+		});
+		
+		b_DoClick = new JButton("Tap On Selected View");
+		b_DoClick.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				paintCommand = PaintCommand.Regular;
+				if (data.selectedView != null)
+					new ClickWorker(me, data.selectedView).execute();
+			}
+		});
+		b_ClearScreen = new JButton("Clear Screen");
+		b_ClearScreen.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				paintCommand = PaintCommand.None;
 				repaint();
 			}
 		});
 		
+		ta_ViewAttr = new JTextArea(20, 30);
+		ta_ViewAttr.setText("Click on a view and its attributes will show here.");
+		ta_ViewAttr.setEditable(false);
 		
+		t2 = new JTextArea(10, 30);
+		t2.setLineWrap(true);
+		t2.setEditable(false);
+		
+		ta_RuntimeLog = new JTextArea(10, 30);
+		ta_RuntimeLog.setEditable(false);
+		sp1 = new JScrollPane(ta_RuntimeLog);
+		
+	}
+	
+	private void organizeLayout()
+	{
+		FlowLayout controlLayout = new FlowLayout(FlowLayout.LEADING);
+		//controlLayout.setVgap(10);
+		JPanel controlPanel = new JPanel(controlLayout);
+		controlPanel.setPreferredSize(new Dimension(400, 800));
+		controlPanel.setMinimumSize(new Dimension(400, 800));
+		controlPanel.add(b_RefreshScreen);
+		controlPanel.add(b_ClearScreen);
+		controlPanel.add(b_DoClick);
+		controlPanel.add(new FillerLabel(350, 1));
+		controlPanel.add(new JLabel("Runtime log:"));
+		controlPanel.add(sp1);
+		controlPanel.add(new FillerLabel(350, 15));
+		controlPanel.add(new JLabel("View Attributes:"));
+		controlPanel.add(ta_ViewAttr);
+		controlPanel.add(new FillerLabel(350, 15));
+		controlPanel.add(new JLabel("Unused text area:"));
+		controlPanel.add(t2);
+		
+		FlowLayout layout = new FlowLayout(FlowLayout.TRAILING);
+		setLayout(layout);
+		add(new FillerLabel(700, 500));
+		add(controlPanel);
 	}
 	
 	public static void init()
@@ -133,50 +192,82 @@ public class MainPanel extends JPanel{
 	
 	public Dimension getPreferredSize()
 	{
-		return new Dimension(1000, 800);
+		return new Dimension(1200, 1000);
 	}
 	
 	
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-				
-		if (this.data.currentHierarchy != null)
+		
+		if (paintCommand == PaintCommand.None || this.data.currentHierarchy == null)
 		{
-			//1. Draw Screen Border
-			drawViewRect(this.data.currentHierarchy.getRootView(), g);
-			//2. Draw Each Leaf View
-			for (View view : this.data.currentHierarchy.getLeafViews())
-			{
-				drawViewRect(view, g);
-			}
+			g.drawRect(20, 20, 700, 600);
+			g.drawString("Device screen layout will be shown here.", offsetX+10, offsetY+10);
+		}
+		else if (paintCommand == PaintCommand.Regular)
+		{
+			paintHierarchy(this.data.currentHierarchy, g);
+		}
+		else if (paintCommand == PaintCommand.HighlightClickable)
+		{
+			//TODO
 		}
 	}
 	
-	private void drawViewRect(View view, Graphics g)
+	private void paintHierarchy(Hierarchy h, Graphics g)
 	{
-		Rectangle rect = view.getBoundsRect();
+		drawViewRect(h.getRootView(), g, Color.gray);
+		drawViewRect(data.selectedView, g, Color.magenta);
+		for (View view : h.getLeafViews())
+		{
+			if (!view.equals(data.selectedView))
+				drawViewRect(view, g, Color.magenta);
+		}
+	}
+	
+	private Rectangle getActualRect(Rectangle rect)
+	{
 		int x = rect.x/shrink_factor + offsetX;
 		int y = rect.y/shrink_factor + offsetY;
 		int width = rect.width/shrink_factor;
 		int height = rect.height/shrink_factor;
+		return new Rectangle(x, y, width, height);
+	}
+	
+	private void drawViewRect(View view, Graphics g, Color color)
+	{
+		if (view == null)
+			return;
+		Color oldColor = g.getColor();
+		g.setColor(color);
+		Rectangle rect = getActualRect(view.getBoundsRect());
 		if (data.selectedView != null && data.selectedView.equals(view))
 		{
-			Color oldColor = g.getColor();
-			g.setColor(Color.green);
-			g.fillRect(x, y, width, height);
-			g.setColor(oldColor);
+			g.fillRect(rect.x, rect.y, rect.width, rect.height);
 		}
 		else
 		{
-			g.drawRect(x, y, width, height);
+			g.drawRect(rect.x, rect.y, rect.width, rect.height);
 		}
+		g.setColor(oldColor);
 		g.setFont(new Font("Ubuntu", Font.PLAIN, 12));
 		if (view.id > -1)
 		{
-			g.drawString("#" + view.id, x + 12, y + 12);
+			g.drawString("#" + view.id, rect.x + 2, rect.y + 12);
 		}
 	}
 
+	class FillerLabel extends JLabel
+	{
+		private static final long serialVersionUID = 1L;
+
+		FillerLabel(int width, int height)
+		{
+			super("");
+			setPreferredSize(new Dimension(width, height));
+			setMinimumSize(new Dimension(width, height));
+		}
+	}
 	
 }

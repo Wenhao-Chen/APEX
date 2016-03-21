@@ -96,4 +96,5 @@ public class Hierarchy {
 		}
 		System.out.println("]");
 	}
+	
 }

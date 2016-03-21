@@ -20,8 +20,8 @@ public class DepthFirst {
 	// 7. goto step 4
 	public static void explore(ApexApp appModel)
 	{
-		File hierarchyXML = UIAutomator.dumpWindowXML();
-		Hierarchy h = new Hierarchy(hierarchyXML);
+		//File hierarchyXML = UIAutomator.dumpWindowXML();
+		//Hierarchy h = new Hierarchy(hierarchyXML);
 		
 	}
 }

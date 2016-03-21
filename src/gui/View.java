@@ -50,13 +50,16 @@ public class View {
 	
 	public String getAttributes()
 	{
-		String result = "Attributes of View #" + id + ":\n\n";
+		String result = this.id > -1? 
+				 "Attributes of View #" + id + ":\n\n"
+				:"Attributes of the root View:\n\n";
 		NamedNodeMap map = this.node.getAttributes();
 		for (int i = 0; i < map.getLength(); i++)
 		{
 			Node node = map.item(i);
-			result += node.getNodeName() + "\t=\t" + node.getNodeValue() + "\n";
+			result += node.getNodeName() + "\t=  " + node.getNodeValue() + "\n";
 		}
 		return result;
 	}
+	
 }
