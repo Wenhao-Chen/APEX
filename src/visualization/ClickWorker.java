@@ -10,22 +10,21 @@ import javax.swing.SwingWorker;
 public class ClickWorker extends SwingWorker<Void, String>{
 
 	private MainPanel panel;
-	private View view;
 	
-	public ClickWorker(MainPanel panel, View view)
+	public ClickWorker(MainPanel panel)
 	{
 		this.panel = panel;
-		this.view = view;
 	}
 	
 	@Override
 	protected Void doInBackground() throws Exception
 	{
-		int x = (int) this.view.getBoundsRect().getCenterX();
-		int y = (int) this.view.getBoundsRect().getCenterY();
+		View view = panel.data.selectedView;
+		int x = (int) view.getBoundsRect().getCenterX();
+		int y = (int) view.getBoundsRect().getCenterY();
 		Input.tap(x, y);
-		publish("ACTION: [tap] at " + x + "," + y + "\n");
-		new UIAutomatorWorker(panel).execute();
+		publish("ACTION: [input tap] at " + x + "," + y + "\n");
+		new LayoutWorker(panel).execute();
 		return null;
 	}
 
