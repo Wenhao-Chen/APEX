@@ -44,22 +44,28 @@ public class MainPanel extends JPanel{
 	protected ClickWorker clickWorker;
 	protected LayoutWorker layoutWorker;
 	
-	protected class PaintSettings {
-		boolean paintLayoutBounds = true;
-		boolean paintScreenCap_All = false;
-		boolean paintScreenCap_LeafOnly = false;
-	}
-	
 	protected enum PaintCommand {NONE, LAYOUTBOUNDS, SCREENCAP_ALL, SCREENCAP_LEAF_ONLY};
 	protected PaintCommand paintCommand = PaintCommand.LAYOUTBOUNDS;
 	
-	private static int offsetX = 80;
+	private static int offsetX = 40;
 	private static int offsetY = 40;
 	private static int shrink_factor = 3;
+	private static int reservedWidth = 700;
+	private static int reservedHeight = 500;
 		
 	public static void main(String[] args)
 	{
-		init();
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run()
+			{
+				JFrame f = new JFrame("APEX");
+				f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				f.setResizable(false);
+				f.add(new MainPanel());
+				f.pack();
+				f.setVisible(true);
+			}
+		});
 	}
 
 	
@@ -113,6 +119,11 @@ public class MainPanel extends JPanel{
 				repaint();
 			}
 		});		
+	}
+	
+	public Dimension getPreferredSize()
+	{
+		return new Dimension(1400, 1000);
 	}
 	
 	private void initWidgets()
@@ -242,50 +253,21 @@ public class MainPanel extends JPanel{
 		
 		FlowLayout layout = new FlowLayout(FlowLayout.TRAILING);
 		setLayout(layout);
-		add(new FillerLabel(700, 500));
+		add(new FillerLabel(reservedWidth + offsetX, reservedHeight + offsetY + 10));
+		add(new JLabel("Test1"));
+		add(new JLabel("Test2"));
+		add(new JLabel("Test3"));
 		add(controlPanel);
 	}
 	
-	public static void init()
-	{
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run()
-			{
-				JFrame f = new JFrame("APEX");
-				f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				f.setResizable(false);
-				f.add(new MainPanel());
-				f.pack();
-				f.setVisible(true);
-			}
-		});
-		
-	}
 
-	
-	public Dimension getPreferredSize()
-	{
-		return new Dimension(1400, 1000);
-	}
-	
-	
-	private void updatePaintCommand()
-	{
-		if (this.rb_ShowLayoutBounds.isSelected())
-			this.paintCommand = PaintCommand.LAYOUTBOUNDS;
-		else if (this.rb_ShowScreenCapAll.isSelected())
-			this.paintCommand = PaintCommand.SCREENCAP_ALL;
-		else if (this.rb_ShowScreenCapLeaf.isSelected())
-			this.paintCommand = PaintCommand.SCREENCAP_LEAF_ONLY;
-	}
-	
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
 		
 		if (paintCommand == PaintCommand.NONE || this.data.currentHierarchy == null)
 		{
-			g.drawRect(20, 20, 700, 600);
+			g.drawRect(offsetX, offsetY, reservedWidth, reservedHeight);
 			g.drawString("Device screen layout will be shown here.", offsetX+10, offsetY+10);
 		}
 		else if (paintCommand == PaintCommand.LAYOUTBOUNDS)
@@ -310,7 +292,12 @@ public class MainPanel extends JPanel{
 		{
 			BufferedImage img = ImageIO.read(imgFile);
 			drawImage(h.getRootView(), img, g);
-			drawViewRect(data.selectedView, g, Color.magenta, false, false);
+			drawViewRect(data.selectedView, g, Color.green, false, false);
+			for (View view : data.currentHierarchy.getLeafViews())
+			{
+				if (!view.equals(data.selectedView))
+					drawViewRect(view, g, Color.pink, false, false);
+			}
 		}
 		catch (Exception e)
 		{
@@ -325,12 +312,13 @@ public class MainPanel extends JPanel{
 		try
 		{
 			BufferedImage img = ImageIO.read(imgFile);
-			drawViewRect(h.getRootView(), g, Color.gray, false, false);
+			drawViewRect(h.getRootView(), g, Color.black, false, false);
 			for (View view : h.getLeafViews())
 			{
 				drawImage(view, img, g);
 			}
-			drawViewRect(data.selectedView, g, Color.magenta, false, false);
+			
+			drawViewRect(data.selectedView, g, Color.green, false, false);
 		}
 		catch (Exception e)
 		{
@@ -393,6 +381,18 @@ public class MainPanel extends JPanel{
 		}
 	}
 
+	
+	private void updatePaintCommand()
+	{
+		if (this.rb_ShowLayoutBounds.isSelected())
+			this.paintCommand = PaintCommand.LAYOUTBOUNDS;
+		else if (this.rb_ShowScreenCapAll.isSelected())
+			this.paintCommand = PaintCommand.SCREENCAP_ALL;
+		else if (this.rb_ShowScreenCapLeaf.isSelected())
+			this.paintCommand = PaintCommand.SCREENCAP_LEAF_ONLY;
+	}
+	
+	
 	class FillerLabel extends JLabel
 	{
 		private static final long serialVersionUID = 1L;

@@ -1,5 +1,5 @@
 package model;
 
-public class EventSummary {
+public class EventSummary{
 
 }
