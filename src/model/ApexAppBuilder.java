@@ -9,15 +9,6 @@ import parsers.XMLParser;
 
 public class ApexAppBuilder {
 
-	
-	public static void main(String[] args)
-	{
-		ApexApp app = fromAPK("temp/net.mandaria.tippytipper.apk");
-		ApexClass c = app.getClassByJavaName("net.mandaria.tippytipperlibrary.activities.About");
-		for (String s :c.getBody())
-				System.out.println(s);
-	}
-	
 	public static boolean decodeRes = true;
 	
 	public static ApexApp fromAPK(String apkFilePath)
@@ -36,6 +27,7 @@ public class ApexAppBuilder {
 		
 		ApexApp app = new ApexApp();
 		app.setOutputDir(apktoolOutDir);
+		app.setAPKPath(apkFilePath);
 		
 		System.out.print("Parsing smali files. Might take a while...");
 		parseSmaliFiles(new File(apktoolOutDir + File.separator + "smali/"), app);

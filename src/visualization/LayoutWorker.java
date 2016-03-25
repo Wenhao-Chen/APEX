@@ -1,6 +1,6 @@
 package visualization;
 
-import gui.Hierarchy;
+import gui.LayoutHierarchy;
 import gui.UIAutomator;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class LayoutWorker extends SwingWorker<LayoutWorker.LayoutInfo, String>{
 		publish("ACTION: [pull screencap.png]...");
 		File f2 = UIAutomator.pullScreenCap();
 		publish(" Done.\n");
-		return new LayoutInfo(new Hierarchy(f1), f2);
+		return new LayoutInfo(new LayoutHierarchy(f1), f2);
 	}
 	
 	@Override
@@ -50,7 +50,7 @@ public class LayoutWorker extends SwingWorker<LayoutWorker.LayoutInfo, String>{
 			LayoutInfo result = get();
 			panel.data.currentHierarchy = result.h;
 			panel.data.screenCapFile = result.screenCapFile;
-			panel.repaint();
+			panel.leftPanel.repaint();
 		} catch (Exception e)	{e.printStackTrace();}
 	}
 	
@@ -62,9 +62,9 @@ public class LayoutWorker extends SwingWorker<LayoutWorker.LayoutInfo, String>{
 	}
 
 	class LayoutInfo {
-		Hierarchy h;
+		LayoutHierarchy h;
 		File screenCapFile;
-		LayoutInfo(Hierarchy h, File f)
+		LayoutInfo(LayoutHierarchy h, File f)
 		{
 			this.h = h;
 			this.screenCapFile = f;

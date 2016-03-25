@@ -18,6 +18,8 @@ public class ApexClass implements Serializable{
 	private List<ApexField> fields = new ArrayList<ApexField>();
 	private List<ApexMethod> methods = new ArrayList<ApexMethod>();
 	
+	private boolean isActivity, isMainActivity;
+	
 	public ApexClass()
 	{}
 	
@@ -235,5 +237,21 @@ public class ApexClass implements Serializable{
 				return s;
 		}
 		return null;
+	}
+
+	public boolean isActivity() {
+		return isActivity;
+	}
+
+	public void setIsActivity(boolean isActivity) {
+		this.isActivity = isActivity;
+	}
+
+	public boolean isMainActivity() {
+		return isMainActivity;
+	}
+
+	public void setIsMainActivity(boolean isMainActivity) {
+		this.isMainActivity = isMainActivity;
 	}
 }

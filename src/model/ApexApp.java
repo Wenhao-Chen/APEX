@@ -143,4 +143,12 @@ public class ApexApp implements Serializable{
 		}
 		return null;
 	}
+	
+	public ApexClass getMainActivity()
+	{
+		for (ApexClass c : this.classes)
+			if (c.isMainActivity())
+				return c;
+		return null;
+	}
 }

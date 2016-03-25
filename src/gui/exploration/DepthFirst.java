@@ -1,6 +1,6 @@
 package gui.exploration;
 
-import gui.Hierarchy;
+import gui.LayoutHierarchy;
 import gui.UIAutomator;
 
 import java.io.File;

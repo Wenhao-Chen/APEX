@@ -18,7 +18,12 @@ public class Communication {
 	{
 		return exec(Settings.adbPath + " install -r " + apkPath);
 	}
-		
+	
+	public static Process startActivity(String packageName, String activityName)
+	{
+		return exec(Settings.adbPath + " shell am start -W -n " + packageName + "/" + activityName);
+	}
+			
 	public static ArrayList<String> readOutStream(Process p)
 	{
 		ArrayList<String> result = new ArrayList<String>();
@@ -40,6 +45,29 @@ public class Communication {
 		}
 		return result;
 	}
+	
+	public static ArrayList<String> readErrorStream(Process p)
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		if (p == null)
+			return result;
+		try
+		{
+			BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			String line;
+			while ((line = in.readLine())!=null)
+			{
+				result.add(line);
+			}
+			in.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	
 	private static Process exec(String command)
 	{

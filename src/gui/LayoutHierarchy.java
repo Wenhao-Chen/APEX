@@ -11,17 +11,17 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class Hierarchy {
+public class LayoutHierarchy {
 
 	private Node hierarchy;
 	private int rotation;	// 0 - portrait, 1 - landscape
 	private List<View> leafViews;
-	private View rootView;
+	private View rootView;	// all other views on screen are children of this rootView
 	
 	private int leafIndex;
 	
 	
-	public Hierarchy(File hiearchyXML)
+	public LayoutHierarchy(File hiearchyXML)
 	{
 		rotation = 0;
 		leafIndex = 0;
@@ -38,9 +38,77 @@ public class Hierarchy {
 		{
 			e.printStackTrace();
 		}
-		
 	}
 	
+	private LayoutHierarchy()
+	{
+		rotation = 0;
+		leafIndex = 0;
+	}
+	
+	public LayoutHierarchy clone()
+	{
+		LayoutHierarchy result = new LayoutHierarchy();
+		result.hierarchy = hierarchy.cloneNode(true);
+		result.rotation = rotation;
+		result.rootView = new View(result.hierarchy.getFirstChild(), -1);
+		result.grabLeafViews(hierarchy);
+		result.leafIndex = -1;
+		return result;
+	}
+	
+	public boolean isSameLayout(LayoutHierarchy h)
+	{
+		//TODO ignoring rotation for now
+		
+		// 1. compare root view
+		if (!this.getRootView().isEquivalent((h.getRootView())))
+			return false;
+		
+		// 2. compare each leaf view
+		for (View v1 : this.getLeafViews())
+		{
+			boolean foundMatch = false;
+			for (View v2 : h.getLeafViews())
+			{
+				if (v1.isEquivalent(v2))
+				{
+					foundMatch = true;
+					break;
+				}
+			}
+			if (!foundMatch)
+				return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean hasEdgesOut()
+	{
+		for (View v : this.getClickableLeafViews())
+			if (v.changesGUIState())
+				return true;
+		return false;
+	}
+	
+	public boolean hasUnclickedView()
+	{
+		for (View v : this.getClickableLeafViews())
+			if (!v.clicked())
+				return true;
+		return false;
+	}
+	
+	public int getUnclickedViewCount()
+	{
+		int result = 0;
+		for (View v : this.getClickableLeafViews())
+			if (!v.clicked())
+				result++;
+		return result;
+	}
+		
 	private void grabLeafViews(Node node)
 	{
 		if (node.getChildNodes().getLength() > 0)
@@ -66,6 +134,15 @@ public class Hierarchy {
 	public List<View> getLeafViews()
 	{
 		return leafViews;
+	}
+	
+	public List<View> getClickableLeafViews()
+	{
+		List<View> results = new ArrayList<View>();
+		for (View v : leafViews)
+			if (v.isClickable())
+				results.add(v);
+		return results;
 	}
 	
 	public int getRotation()
