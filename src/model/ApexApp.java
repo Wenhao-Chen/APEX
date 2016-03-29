@@ -15,9 +15,8 @@ public class ApexApp implements Serializable{
 	private List<ApexClass> classes = new ArrayList<ApexClass>();
 	private String apkPath;
 	private String outputDir;
-	
+		
 	ApexApp() {}
-	
 	
 	
 	public String getAPKPath()
@@ -151,4 +150,25 @@ public class ApexApp implements Serializable{
 				return c;
 		return null;
 	}
+	
+	
+	public void instrument()
+	{
+		
+	}
+	
+	
+	public String getInstrumentedLoggerClassDexName()
+	{
+		String result = "Lapex/app/Logger;";
+		ApexClass c = getClassByDexName(result);
+		int suffix = 0;
+		while (c != null)
+		{
+			result = result.substring(0, result.length()-1) + suffix++ + ";";
+			c = getClassByDexName(result);
+		}
+		return result;
+	}
+	
 }

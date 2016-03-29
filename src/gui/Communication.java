@@ -1,5 +1,7 @@
 package gui;
 
+import instrumentation.LoggerSmali;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -22,6 +24,17 @@ public class Communication {
 	public static Process startActivity(String packageName, String activityName)
 	{
 		return exec(Settings.adbPath + " shell am start -W -n " + packageName + "/" + activityName);
+	}
+	
+	public static Process clearLogcat()
+	{
+		return exec(Settings.adbPath + " logcat -c");
+	}
+	
+	public static ArrayList<String> readLogcat()
+	{
+		Process p = exec(Settings.adbPath + " logcat -d -s " + LoggerSmali.tagName);
+		return readOutStream(p);
 	}
 			
 	public static ArrayList<String> readOutStream(Process p)

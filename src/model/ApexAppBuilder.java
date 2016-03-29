@@ -20,13 +20,17 @@ public class ApexAppBuilder {
 			return null;
 		}
 		
-		String apktoolOutDir = Settings.outputDir.replace("/", File.separator) + 
-				File.separator + f.getName() + File.separator + "apktool/";
+		String outDir = Settings.outputDir.replace("/", File.separator);
+		if (!outDir.endsWith(File.separator))
+			outDir += File.separator;
+		outDir += f.getName();
+		
+		String apktoolOutDir =  outDir + File.separator + "apktool" + File.separator;
 		new File(apktoolOutDir).mkdirs();
 		Apktool.extractAPK(f.getAbsolutePath(), apktoolOutDir, decodeRes);
 		
 		ApexApp app = new ApexApp();
-		app.setOutputDir(apktoolOutDir);
+		app.setOutputDir(outDir);
 		app.setAPKPath(apkFilePath);
 		
 		System.out.print("Parsing smali files. Might take a while...");

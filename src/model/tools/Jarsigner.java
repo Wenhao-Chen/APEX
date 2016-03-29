@@ -6,7 +6,7 @@ import java.io.OutputStream;
 public class Jarsigner {
 
 	
-	private static String KeyStorePath = "tools/wenhaoc.keystore";
+	private static String KeyStorePath = "tools" + File.separator + "wenhaoc.keystore";
 	private static String KeyStoreKey = "isu_obad";
 	
 	public static void signAPK(String inAppPath, String outAppPath)
@@ -22,7 +22,7 @@ public class Jarsigner {
 		if (outApp.exists())
 			outApp.delete();
 		try {
-			String keystoreName = KeyStorePath.substring(KeyStorePath.lastIndexOf("/")+1);
+			String keystoreName = KeyStorePath.substring(KeyStorePath.lastIndexOf(File.separator)+1);
 			String command = "jarsigner -keystore " + KeyStorePath
 							+ " -signedjar " + outAppPath
 							+ " " + inAppPath

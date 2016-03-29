@@ -1,14 +1,15 @@
 package gui.exploration;
 
+import gui.Communication;
 import gui.LayoutHierarchy;
 import gui.UIAutomator;
-
-import java.io.File;
-
 import model.ApexApp;
+import model.ApexAppBuilder;
 
 public class DepthFirst {
 
+	
+	
 	
 	// 0. Static analyze the app
 	// 1. Instrument the app
@@ -22,6 +23,20 @@ public class DepthFirst {
 	{
 		//File hierarchyXML = UIAutomator.dumpWindowXML();
 		//Hierarchy h = new Hierarchy(hierarchyXML);
+		ApexApp app = ApexAppBuilder.fromAPK("temp/net.mandaria.tippytipper.apk");
 		
+		Communication.installApp(app.getAPKPath());
+		Communication.startActivity(app.getPackageName(), app.getMainActivity().getJavaName());
+		
+		
+		
+		LayoutHierarchy h = pullLayout();
+		
+	}
+	
+	
+	private static LayoutHierarchy pullLayout()
+	{
+		return new LayoutHierarchy(UIAutomator.pullDump());
 	}
 }
