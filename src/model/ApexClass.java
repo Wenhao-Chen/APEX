@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import parsers.SmaliParser;
+
 public class ApexClass implements Serializable{
 
 	
@@ -189,6 +191,38 @@ public class ApexClass implements Serializable{
 		return result;
 	}
 	
+	public ArrayList<String> getInstrumentedBody()
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(this.declaration);
+		result.add(".super " + this.superClass);
+		if (!this.sourceFileName.equals(""))
+			result.add(".source \"" + this.sourceFileName + "\"");
+		result.add("");
+		if (this.interfaces.size()>0)
+		{
+			for (String s : this.interfaces)
+				result.add(".implements " + s);
+			result.add("");
+		}
+		if (this.annotations.size()>0)
+		{
+			for (String s : this.annotations)
+				result.add(s);
+		}
+		for (ApexField f : this.fields)
+		{
+			result.addAll(f.getFullDeclaration());
+			result.add("");
+		}
+		for (ApexMethod m : this.methods)
+		{
+			result.addAll(m.getBody());
+			result.add("");
+		}
+		return result;
+	}
+	
 	public ApexMethod getMethodBySignature(String methodSignature)
 	{
 		for (ApexMethod m : this.methods)
@@ -254,4 +288,23 @@ public class ApexClass implements Serializable{
 	public void setIsMainActivity(boolean isMainActivity) {
 		this.isMainActivity = isMainActivity;
 	}
+	
+	public boolean isLibraryClass()
+	{
+		for (String c : SmaliParser.libraryClasses)
+		{
+			if (c.endsWith("*"))
+			{
+				if (getDexName().startsWith(c.substring(0, c.lastIndexOf("*"))))
+					return true;
+			}
+			else if (c.endsWith(";"))
+			{
+				if (getDexName().equals(c))
+					return true;
+			}
+		}
+		return false;
+	}
+	
 }

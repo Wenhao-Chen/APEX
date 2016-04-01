@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import model.ApexClass;
 import model.ApexField;
@@ -14,6 +15,23 @@ import model.ApexMethod;
 
 public class SmaliParser {
 
+	
+	public static ArrayList<String> libraryClasses = new ArrayList<String>(Arrays.asList(
+			"Landroid/app/*",
+			"Landroid/support/v4/*",
+			"Landroid/support/v7/*",
+			"Landroid/support/annotation/*",
+			"Landroid/support/design/*",
+			"Lcom/example/androidtest/R*",
+			"Lcom/actionbarsherlock/*",
+			"Lcom/flurry/sdk/*",
+			"Lorg/kobjects/*",
+			"Lorg/ksoap2/*",
+			"Lorg/kxml2/*",
+			"Lorg/xmlpull/*",
+			"Lnet/mandaria/tippytipperlibrary/activities/Total$5;",
+			"Lcom/google/gson/*"
+	));
 
 	public static ApexClass parse(File f) throws IOException
 	{
@@ -82,13 +100,13 @@ public class SmaliParser {
 		}
 		in.close();
 		c.setSmaliPath(f.getAbsolutePath());
-		moveSmaliFile(f, c);
+		backupSmaliFile(f, c);
 		return c;
 	}
 	
-	// put a copy of the original smali files into "/oldSmali" folder
+	// put a copy of the smali files from "/smali" folder into "/oldSmali" folder,
 	// because later instrumentation will overwrite the "/smali" folder
-	private static void moveSmaliFile(File f, ApexClass c)
+	private static void backupSmaliFile(File f, ApexClass c)
 	{
 		try
 		{

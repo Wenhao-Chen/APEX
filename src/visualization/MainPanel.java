@@ -90,7 +90,7 @@ public class MainPanel extends JPanel{
 		layout.setHgap(mainHGap);
 		setLayout(layout);
 		leftPanel = new DisplayPanel();
-		rightPanel = new ControlPanel(leftPanel);
+		rightPanel = new ControlPanel();
 		add(leftPanel);
 		add(rightPanel);
 		data = new Data();
@@ -334,7 +334,7 @@ public class MainPanel extends JPanel{
 		
 		private static final long serialVersionUID = 1L;
 		
-		ControlPanel(DisplayPanel display)
+		ControlPanel()
 		{
 			setPreferredSize(new Dimension(controlPanelWidth, mainHeight));
 			setMinimumSize(new Dimension(controlPanelWidth, mainHeight));
@@ -363,7 +363,7 @@ public class MainPanel extends JPanel{
 				public void mouseClicked(MouseEvent e)
 				{
 					paintCommand = PaintCommand.NONE;
-					display.repaint();
+					leftPanel.repaint();
 				}
 			});
 			
@@ -390,7 +390,7 @@ public class MainPanel extends JPanel{
 				public void actionPerformed(ActionEvent e)
 				{
 					paintCommand = PaintCommand.LAYOUTBOUNDS;
-					display.repaint();
+					leftPanel.repaint();
 				}
 			});
 			
@@ -401,7 +401,7 @@ public class MainPanel extends JPanel{
 				public void actionPerformed(ActionEvent e)
 				{
 					paintCommand = PaintCommand.SCREENCAP_ALL;
-					display.repaint();
+					leftPanel.repaint();
 				}
 			});
 			
@@ -412,7 +412,7 @@ public class MainPanel extends JPanel{
 				public void actionPerformed(ActionEvent e)
 				{
 					paintCommand = PaintCommand.SCREENCAP_LEAF_ONLY;
-					display.repaint();
+					leftPanel.repaint();
 				}
 			});
 			
@@ -423,7 +423,7 @@ public class MainPanel extends JPanel{
 				public void actionPerformed(ActionEvent e)
 				{
 					paintCommand = PaintCommand.SCREENCAP_CLICKABLE_ONLY;
-					display.repaint();
+					leftPanel.repaint();
 				}
 			});
 

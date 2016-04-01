@@ -18,7 +18,7 @@ public class LoggerSmali {
 	"    return-void" + "\n" + 
 	".end method" + "\n" + 
 	
-	".method public static print(Ljava/lang/String;)V" + "\n" + 
+	".method public static d(Ljava/lang/String;)V" + "\n" + 
 	"    .locals 1" + "\n" + 
 	
 	"    .prologue" + "\n" + 
@@ -35,5 +35,9 @@ public class LoggerSmali {
 		return line1 + "\n" + body;
 	}
 	
+	public static String getPrintMethodSubSignature()
+	{
+		return "d(Ljava/lang/String;)V";
+	}
 	
 }

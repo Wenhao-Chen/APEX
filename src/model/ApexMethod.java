@@ -19,6 +19,7 @@ public class ApexMethod implements Serializable{
 	
 	private ArrayList<ApexStmt> statements = new ArrayList<ApexStmt>();
 	private ArrayList<ArrayList<String>> supplementalData = new ArrayList<ArrayList<String>>();
+	private ArrayList<ApexCodeBlock> blocks = new ArrayList<ApexCodeBlock>();
 	
 	
 	public ApexMethod(ArrayList<String> declaration, ApexClass c)
@@ -78,12 +79,14 @@ public class ApexMethod implements Serializable{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void parseBody(ArrayList<String> body)
 	{
 		if (body.size() <= 2)
 			return;
 		int i = 1;
 		ArrayList<String> debugInfo = new ArrayList<String>();
+		ArrayList<ApexStmt> currentBlock = new ArrayList<ApexStmt>();
 		boolean inTryBlock = false;
 		while (i < body.size())
 		{
@@ -209,12 +212,23 @@ public class ApexMethod implements Serializable{
 				ApexStmt s = new ApexStmt(line, this.statements.size(), this);
 				s.setDebugInfo(debugInfo);
 				debugInfo.clear();
+				if (s.hasBlockLabel() && !currentBlock.isEmpty())
+				{
+					this.blocks.add(new ApexCodeBlock((ArrayList<ApexStmt>) currentBlock.clone()));
+					currentBlock.clear();
+				}
 				if (!s.hasBlockLabel() && !this.statements.isEmpty())
 				{
 					s.copyBlockLabel(this.statements.get(this.statements.size()-1));
 				}
 				s.setIsInTryBlock(inTryBlock);
 				this.statements.add(s);
+				currentBlock.add(s);
+				if (s.isGotoStmt() || s.isReturnStmt() || s.isThrowStmt() || s.isIfStmt() || s.isSwitchStmt())
+				{
+					this.blocks.add(new ApexCodeBlock((ArrayList<ApexStmt>) currentBlock.clone()));
+					currentBlock.clear();
+				}
 			}
 			i++;
 		}
@@ -227,6 +241,38 @@ public class ApexMethod implements Serializable{
 		result.add(this.declaration);
 		if (this.localRegisterCount > -1)
 			result.add("    .locals " + this.localRegisterCount);
+		result.addAll(this.paramDeclarations);
+		if (this.annotations.size()>0)
+		{
+			result.addAll(this.annotations);
+		}
+		else
+		{
+			result.add("");
+		}
+		for (int i = 0; i < this.statements.size(); i++)
+		{
+			ApexStmt s = this.statements.get(i);
+			result.addAll(s.getBody());
+			if (i < this.statements.size()-1 || !this.supplementalData.isEmpty())
+				result.add("");
+		}
+		for (int i = 0; i < this.supplementalData.size(); i++)
+		{
+			result.addAll(this.supplementalData.get(i));
+			if (i < this.supplementalData.size()-1)
+				result.add("");
+		}
+		result.add(".end method");
+		return result;
+	}
+	
+	public ArrayList<String> getInstrumentedBody()
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(this.declaration);
+		if (this.localRegisterCount > -1)
+			result.add("    .locals " + this);
 		result.addAll(this.paramDeclarations);
 		if (this.annotations.size()>0)
 		{
@@ -266,6 +312,12 @@ public class ApexMethod implements Serializable{
 	public String getSignature()
 	{
 		return this.declaringClass.getDexName() + "->" + this.getSubSignature();
+	}
+	
+	public String getName()
+	{
+		String subSig = getSubSignature();
+		return subSig.substring(0, subSig.indexOf("("));
 	}
 	
 	public String getSubSignature()
@@ -326,6 +378,19 @@ public class ApexMethod implements Serializable{
 	public ArrayList<ApexStmt> getStatements() 
 	{
 		return this.statements;
+	}
+	
+	public ArrayList<ApexCodeBlock> getCodeBlocks()
+	{
+		return this.blocks;
+	}
+	
+	public ApexCodeBlock getCodeBlockContaining(ApexStmt s)
+	{
+		for (ApexCodeBlock block : blocks)
+			if (block.contains(s))
+				return block;
+		return null;
 	}
 
 	public ArrayList<String> getParamTypes() 

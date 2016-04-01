@@ -1,5 +1,7 @@
 package model;
 
+import instrumentation.Instrumentor;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -154,7 +156,7 @@ public class ApexApp implements Serializable{
 	
 	public void instrument()
 	{
-		
+		Instrumentor.instrument(this);
 	}
 	
 	
