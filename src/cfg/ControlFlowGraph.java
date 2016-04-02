@@ -2,6 +2,7 @@ package cfg;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 import model.ApexCodeBlock;
 import model.ApexMethod;
@@ -26,6 +27,7 @@ public class ControlFlowGraph{
 		initVertices();
 		initEdges();
 	}
+	
 	
 	private void initVertices()
 	{
@@ -140,19 +142,32 @@ public class ControlFlowGraph{
 		return edges;
 	}
 	
+	
 	public DirectedGraph<ApexStmt, String> getJGrapht()
 	{
-		if (jgrapht == null)
+
+		DirectedGraph<ApexStmt, String> jgrapht = new DefaultDirectedGraph<ApexStmt, String>(String.class);
+		for (Vertex v : vertices)
 		{
-			jgrapht = new DefaultDirectedGraph<ApexStmt, String>(String.class);
-			for (Vertex v : vertices)
-			{
-				jgrapht.addVertex(v.getApexStmt());
-			}
-			for (Edge e : edges)
-			{
-				jgrapht.addEdge(e.getSource().getApexStmt(), e.getTarget().getApexStmt(), e.getLabel());
-			}
+			jgrapht.addVertex(v.getApexStmt());
+		}
+		for (Edge e : edges)
+		{
+			jgrapht.addEdge(e.getSource().getApexStmt(), e.getTarget().getApexStmt(), e.getLabel());
+		}
+		return jgrapht;
+	}
+	
+	public DirectedGraph<ApexCodeBlock, String> getBlockJGrapht()
+	{
+		DirectedGraph<ApexCodeBlock, String> jgrapht = new DefaultDirectedGraph<ApexCodeBlock, String>(String.class);
+		for (Vertex v : blockVertices)
+		{
+			jgrapht.addVertex(v.getCodeBlock());
+		}
+		for (Edge e : edges)
+		{
+			jgrapht.addEdge(e.getSource().getCodeBlock(), e.getTarget().getCodeBlock(), e.getLabel());
 		}
 		return jgrapht;
 	}

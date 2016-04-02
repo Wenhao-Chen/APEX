@@ -3,11 +3,17 @@ package visualization;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Set;
 
 import model.ApexApp;
 import model.ApexAppBuilder;
 import model.ApexClass;
+import model.ApexCodeBlock;
 import model.ApexMethod;
+
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.CycleDetector;
+
 import cfg.ControlFlowGraph;
 import cfg.Vertex;
 
@@ -58,9 +64,13 @@ public class CFG{
 					else
 						cfg.getBlockVertices().get(i).setColor("red");
 				}
+				DirectedGraph<ApexCodeBlock, String> blockCFG = cfg.getBlockJGrapht();
+				highlightLoops(blockCFG);
 				out.write(cfg.getBlockDotGraph());
 				//DirectedGraph g = m.getControlFlowGraph();
 				System.out.println("exporting " + m.getSignature());
+				CycleDetector cycle = new CycleDetector(blockCFG);
+
 				//System.out.println(g.edgeSet());
 				//exporter.export(out, g);
 				out.flush();
@@ -71,6 +81,16 @@ public class CFG{
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	private <V, E> void highlightLoops(DirectedGraph<V, E> g)
+	{
+		CycleDetector cycle = new CycleDetector(g);
+		Set<V> s = cycle.findCycles();
+		for (V v : s)
+		{
+			
 		}
 	}
 	
